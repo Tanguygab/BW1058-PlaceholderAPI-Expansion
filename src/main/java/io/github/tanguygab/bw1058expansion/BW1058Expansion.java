@@ -21,7 +21,7 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
 
     @Override
     public String getIdentifier() {
-        return "bw1058+";
+        return "bw1058plus";
     }
 
     @Override
