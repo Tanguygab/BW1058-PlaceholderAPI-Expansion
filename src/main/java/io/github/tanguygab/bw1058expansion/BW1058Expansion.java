@@ -55,6 +55,7 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
                 "arena_nextevent_name",
                 "arena_nextevent_time",
                 "arena_name",
+                "arena_display_name",
                 "arena_group",
                 "arena_world",
                 "arena_status_plocale",
@@ -196,6 +197,8 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
         }
         if (params.equalsIgnoreCase("arena_name"))
             return arena.getArenaName();
+        if (params.equalsIgnoreCase("arena_display_name"))
+            return arena.getDisplayName();
         if (params.equalsIgnoreCase("arena_group"))
             return arena.getGroup();
         if (params.equalsIgnoreCase("arena_world"))
