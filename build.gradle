@@ -1,11 +1,9 @@
-import org.apache.tools.ant.filters.ReplaceTokens
-
 plugins {
     id 'java'
 }
 
 group = 'io.github.tanguygab'
-version = '1.2'
+version = '1.2.1'
 
 repositories {
     mavenCentral()
@@ -29,11 +27,7 @@ repositories {
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.10.9'
-    compileOnly 'com.andrei1058.bedwars:bedwars-api:21.2'
+    //compileOnly 'com.andrei1058.bedwars:bedwars-api:22.7' repo down
+    compileOnly files('../../../dependencies/Bedwars1058-22.7.jar')
 }
 
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        filter ReplaceTokens, tokens: [version: version]
-    }
-}

@@ -31,7 +31,7 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
 
     @Override
     public String getVersion() {
-        return "1.2";
+        return "1.2.1";
     }
 
     @Override
@@ -82,7 +82,7 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
 
     @Override
     public void start() {
-        api = Bukkit.getServicesManager().getRegistration(BedWars .class).getProvider();
+        api = Bukkit.getServicesManager().getRegistration(BedWars.class).getProvider();
     }
 
     @Override
