@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'io.github.tanguygab'
-version = '1.2.1'
+version = '1.2.2'
 
 repositories {
     mavenCentral()
@@ -20,14 +20,14 @@ repositories {
     }
     maven {
         name = 'andrei10518-repo'
-        url = 'http://repo.andrei1058.com/releases/'
+        url = 'http://repo.andrei1058.dev/releases/'
     }
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.10.9'
-    //compileOnly 'com.andrei1058.bedwars:bedwars-api:22.7' repo down
-    compileOnly files('../../../dependencies/Bedwars1058-22.7.jar')
+    //compileOnly 'com.andrei1058.bedwars:bedwars-api:23.3' doesn't want to work for some reason
+    compileOnly files('../../../dependencies/BedWars1058-23.3.jar')
 }
 

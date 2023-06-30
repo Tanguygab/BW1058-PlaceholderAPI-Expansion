@@ -10,38 +10,25 @@ import me.clip.placeholderapi.expansion.Taskable;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
+import javax.annotation.Nonnull;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 public final class BW1058Expansion extends PlaceholderExpansion implements Taskable {
 
     private BedWars api;
+    private final List<String> placeholders;
+    private final SimpleDateFormat nextEventFormat = new SimpleDateFormat("mm:ss");
 
-    @Override
-    public String getIdentifier() {
-        return "bw1058plus";
-    }
-
-    @Override
-    public String getAuthor() {
-        return "Tanguygab";
-    }
-
-    @Override
-    public String getVersion() {
-        return "1.2.1";
-    }
-
-    @Override
-    public String getRequiredPlugin() {
-        return "BedWars1058";
-    }
-
-    @Override
-    public  List<String> getPlaceholders() {
-        List<String> list = new ArrayList<>(Arrays.asList("team_letter",
+    public BW1058Expansion() {
+        placeholders = Stream.of("team_letter",
                 "team_color",
                 "team_status",
                 "team_players_amount",
@@ -74,15 +61,38 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
                 "party_members_amount",
                 "party_in_yours_<player>",
                 "party_in_his_<player>",
-                "party_is_owner"));
-        for (String placeholder : list)
-            list.set(list.indexOf(placeholder),"%bw1058+_" + placeholder + "%");
-        return list;
+                "party_is_owner").map(p->"%bw1058plus_"+p+"%").collect(Collectors.toList());
+    }
+
+    @Override
+    public @Nonnull String getIdentifier() {
+        return "bw1058plus";
+    }
+
+    @Override
+    public @Nonnull String getAuthor() {
+        return "Tanguygab";
+    }
+
+    @Override
+    public @Nonnull String getVersion() {
+        return "1.2.2";
+    }
+
+    @Override
+    public String getRequiredPlugin() {
+        return "BedWars1058";
+    }
+
+    @Override
+    public @Nonnull List<String> getPlaceholders() {
+        return placeholders;
     }
 
     @Override
     public void start() {
-        api = Bukkit.getServicesManager().getRegistration(BedWars.class).getProvider();
+        RegisteredServiceProvider<BedWars> r = Bukkit.getServicesManager().getRegistration(BedWars.class);
+        if (r != null) api = r.getProvider();
     }
 
     @Override
@@ -91,7 +101,7 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
     }
 
     @Override
-    public String onRequest(OfflinePlayer player, String params) {
+    public String onRequest(OfflinePlayer player, @Nonnull String params) {
         if (player == null) return "";
         Player p = player.getPlayer();
         if (p == null) return "";
@@ -99,36 +109,36 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
         //party placeholders
         Party party = api.getPartyUtil();
         if (params.equalsIgnoreCase("party_has"))
-            return party.hasParty(p)+"";
+            return String.valueOf(party.hasParty(p));
         if (params.startsWith("party_members")) {
-            String output = "";
+            StringBuilder output = new StringBuilder();
             List<Player> list = new ArrayList<>(party.getMembers(p));
             if (params.equalsIgnoreCase("party_members_amount"))
-                output = list.size()+"";
+                output = new StringBuilder(String.valueOf(list.size()));
             else if (params.equalsIgnoreCase("party_members")) {
                 for (Player pl : list) {
-                    output = output + pl.getName();
-                    if (list.indexOf(pl) != list.size() - 1) output = output + ", ";
+                    output.append(pl.getName());
+                    if (list.indexOf(pl) != list.size() - 1) output.append(", ");
                 }
             }
-            return output;
+            return output.toString();
         }
         if (params.startsWith("party_in_yours_")) {
             Player p2 = Bukkit.getServer().getPlayer(params.replace("party_in_yours_",""));
             if (p2 == null) return "false";
-            return party.isMember(p,p2)+"";
+            return String.valueOf(party.isMember(p, p2));
         }
         if (params.startsWith("party_in_his_")) {
             Player p2 = Bukkit.getServer().getPlayer(params.replace("party_in_his_",""));
             if (p2 == null) return "false";
-            return party.isMember(p2,p)+"";
+            return String.valueOf(party.isMember(p2, p));
         }
         if (params.startsWith("party_is_owner")) {
-            if (params.equalsIgnoreCase("party_is_owner")) return party.isOwner(p)+"";
+            if (params.equalsIgnoreCase("party_is_owner")) return String.valueOf(party.isOwner(p));
             if (params.startsWith("party_is_owner_")) {
                 Player p2 = Bukkit.getServer().getPlayer(params.replace("party_is_owner_", ""));
                 if (p2 == null) return "false";
-                return party.isOwner(p2) + "";
+                return String.valueOf(party.isOwner(p2));
             }
         }
 
@@ -136,7 +146,7 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
         if (params.startsWith("lang"))
             return lang.getLangName();
 
-        //placeholdesr only available in an arena
+        //placeholders only available in an arena
         IArena arena = api.getArenaUtil().getArenaByPlayer(p);
         if (arena == null) return "";
 
@@ -147,7 +157,7 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
                 team = arena.getTeam(p);
             else team = arena.getTeam(params.replace("team_status_", ""));
             if (team != null)
-                return !team.isBedDestroyed() ? lang.getString("format-sb-team-alive") : !team.getMembers().isEmpty() ? team.getMembers().size()+"" : lang.getString("format-sb-team-eliminated");
+                return !team.isBedDestroyed() ? lang.getString("format-sb-team-alive") : !team.getMembers().isEmpty() ? String.valueOf(team.getMembers().size()) : lang.getString("format-sb-team-eliminated");
         }
         if (params.startsWith("team_color")) {
             ITeam team;
@@ -171,7 +181,7 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
                 team = arena.getTeam(p);
             else team = arena.getTeam(params.replace("team_players_amount_", ""));
             if (team != null)
-                return team.getMembers().size()+"";
+                return String.valueOf(team.getMembers().size());
         }
         if (params.startsWith("team_players")) {
             ITeam team;
@@ -179,63 +189,62 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
                 team = arena.getTeam(p);
             else team = arena.getTeam(params.replace("team_players_", ""));
             if (team != null) {
-                String output = "";
+                StringBuilder output = new StringBuilder();
                 List<Player> list = new ArrayList<>(team.getMembers());
                 for (Player pl : list) {
-                    output = output+pl.getName();
-                    if (list.indexOf(pl) != list.size()-1) output = output+", ";
+                    output.append(pl.getName());
+                    if (list.indexOf(pl) != list.size()-1) output.append(", ");
                 }
-                return output;
+                return output.toString();
             }
         }
         //arena placeholders
-        if (params.equalsIgnoreCase("arena_nextevent_name")) {
-            return arena.getNextEvent().toString().toLowerCase().replace("_"," ");
+        switch (params) {
+            case "arena_nextevent_name": return arena.getNextEvent().toString().toLowerCase().replace("_"," ");
+            case "arena_nextevent_time": return String.valueOf(getNextEventTime(arena));
+            case "arena_nextevent_time_formatted": return nextEventFormat.format(new Date(getNextEventTime(arena)*1000L));
+            case "arena_name": return arena.getArenaName();
+            case "arena_display_name": return arena.getDisplayName();
+            case "arena_group": return arena.getGroup();
+            case "arena_world": return arena.getWorldName();
+            case "arena_status_plocale": return arena.getDisplayStatus(lang);
+            case "arena_status": return arena.getDisplayStatus(api.getDefaultLang());
+            //player placeholders
+            case "player_kills": return String.valueOf(arena.getPlayerKills(p, false));
+            case "player_kills_total": return String.valueOf(arena.getPlayerKills(p,true)+arena.getPlayerKills(p,false));
+            case "player_kills_final": return String.valueOf(arena.getPlayerKills(p, true));
+            case "player_deaths": return String.valueOf(arena.getPlayerDeaths(p, false));
+            case "player_deaths_total": return String.valueOf(arena.getPlayerDeaths(p,true)+arena.getPlayerDeaths(p,false));
+            case "player_deaths_final": return String.valueOf(arena.getPlayerDeaths(p, true));
+            case "player_beds": return String.valueOf(arena.getPlayerBedsDestroyed(p));
         }
-        if (params.equalsIgnoreCase("arena_nextevent_time")) {
-            return arena.getNextEvent().toString().toLowerCase().replace("_"," ");
-        }
-        if (params.equalsIgnoreCase("arena_name"))
-            return arena.getArenaName();
-        if (params.equalsIgnoreCase("arena_display_name"))
-            return arena.getDisplayName();
-        if (params.equalsIgnoreCase("arena_group"))
-            return arena.getGroup();
-        if (params.equalsIgnoreCase("arena_world"))
-            return arena.getWorldName();
-        if (params.equalsIgnoreCase("arena_status_plocale"))
-            return arena.getDisplayStatus(lang);
-        if (params.equalsIgnoreCase("arena_status"))
-            return arena.getDisplayStatus(api.getDefaultLang());
-        //player placeholders
-        if (params.equalsIgnoreCase("player_kills"))
-            return arena.getPlayerKills(p,false)+"";
-        if (params.equalsIgnoreCase("player_kills_total"))
-            return arena.getPlayerKills(p,true)+arena.getPlayerKills(p,false)+"";
-        if (params.equalsIgnoreCase("player_kills_final"))
-            return arena.getPlayerKills(p,true)+"";
-        if (params.equalsIgnoreCase("player_deaths"))
-            return arena.getPlayerDeaths(p,false)+"";
-        if (params.equalsIgnoreCase("player_deaths_total"))
-            return arena.getPlayerDeaths(p,true)+arena.getPlayerDeaths(p,false)+"";
-        if (params.equalsIgnoreCase("player_deaths_final"))
-            return arena.getPlayerDeaths(p,true)+"";
-        if (params.equalsIgnoreCase("player_beds"))
-            return arena.getPlayerBedsDestroyed(p)+"";
         if (params.startsWith("players")) {
-            String output = "";
+            StringBuilder output = new StringBuilder();
             List<Player> list = new ArrayList<>(arena.getPlayers());
             if (params.equalsIgnoreCase("players_amount"))
-                output = list.size()+"";
+                output = new StringBuilder(String.valueOf(list.size()));
             else if (params.equalsIgnoreCase("players")) {
                 for (Player pl : list) {
-                    output = output + pl.getName();
-                    if (list.indexOf(pl) != list.size() - 1) output = output + ", ";
+                    output.append(pl.getName());
+                    if (list.indexOf(pl) != list.size() - 1) output.append(", ");
                 }
             }
-            return output;
+            return output.toString();
         }
 
         return "";
+    }
+
+    private int getNextEventTime(IArena arena) {
+        switch (arena.getNextEvent()) {
+            case EMERALD_GENERATOR_TIER_II:
+            case EMERALD_GENERATOR_TIER_III: return arena.getUpgradeEmeraldsCount();
+            case DIAMOND_GENERATOR_TIER_II:
+            case DIAMOND_GENERATOR_TIER_III: return arena.getUpgradeDiamondsCount();
+            case BEDS_DESTROY: return arena.getPlayingTask().getBedsDestroyCountdown();
+            case ENDER_DRAGON: return arena.getPlayingTask().getDragonSpawnCountdown();
+            case GAME_END: return arena.getPlayingTask().getGameEndCountdown();
+            default: return 0;
+        }
     }
 }
