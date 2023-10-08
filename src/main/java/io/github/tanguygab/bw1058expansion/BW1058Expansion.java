@@ -4,9 +4,11 @@ import com.andrei1058.bedwars.api.BedWars;
 import com.andrei1058.bedwars.api.arena.IArena;
 import com.andrei1058.bedwars.api.arena.team.ITeam;
 import com.andrei1058.bedwars.api.language.Language;
+import com.andrei1058.bedwars.api.language.Messages;
 import com.andrei1058.bedwars.api.party.Party;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Taskable;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -54,6 +56,8 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
                 "player_deaths_final",
                 "player_deaths_total",
                 "player_beds",
+                "status_color",
+                "%status_letter",
                 "players",
                 "players_amount",
                 "party_has",
@@ -217,6 +221,8 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
             case "player_deaths_total": return String.valueOf(arena.getPlayerDeaths(p,true)+arena.getPlayerDeaths(p,false));
             case "player_deaths_final": return String.valueOf(arena.getPlayerDeaths(p, true));
             case "player_beds": return String.valueOf(arena.getPlayerBedsDestroyed(p));
+            case "status_color": return (arena.isSpectator(p) ? ChatColor.GRAY : arena.getTeam(p).getColor().chat()).toString();
+            case "status_letter": return arena.isSpectator(p) ? getSpectatorLetter(lang) : arena.getTeam(p).getName().substring(0,1).toUpperCase();
         }
         if (params.startsWith("players")) {
             StringBuilder output = new StringBuilder();
@@ -233,6 +239,11 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
         }
 
         return "";
+    }
+
+    private String getSpectatorLetter(Language lang) {
+        String letter = lang.m("format-papi-player-spectator-letter");
+        return letter.equals("MISSING_LANG") ? "S" : letter;
     }
 
     private int getNextEventTime(IArena arena) {
