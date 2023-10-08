@@ -57,7 +57,7 @@ public final class BW1058Expansion extends PlaceholderExpansion implements Taska
                 "player_deaths_total",
                 "player_beds",
                 "status_color",
-                "%status_letter",
+                "status_letter",
                 "players",
                 "players_amount",
                 "party_has",
